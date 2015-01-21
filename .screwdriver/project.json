@@ -8,7 +8,7 @@
     {
       "repository": "https://github.com/substance/chronicle.git",
       "folder": "node_modules/substance-chronicle",
-      "branch": "master"
+      "branch": "substance-next"
     },
     {
       "repository": "https://github.com/substance/compiler.git",
@@ -28,12 +28,12 @@
     {
       "repository": "https://github.com/substance/data.git",
       "folder": "node_modules/substance-data",
-      "branch": "master"
+      "branch": "substance-next"
     },
     {
       "repository": "https://github.com/substance/document.git",
       "folder": "node_modules/substance-document",
-      "branch": "master"
+      "branch": "substance-next"
     },
     {
       "repository": "https://github.com/substance/article.git",
@@ -63,7 +63,7 @@
     {
       "repository": "https://github.com/substance/operator.git",
       "folder": "node_modules/substance-operator",
-      "branch": "master"
+      "branch": "substance-next"
     },
     {
       "repository": "https://github.com/substance/regexp.git",
@@ -73,7 +73,7 @@
     {
       "repository": "https://github.com/substance/surface.git",
       "folder": "node_modules/substance-surface",
-      "branch": "master"
+      "branch": "substance-next"
     },
     {
       "repository": "https://github.com/substance/test.git",
@@ -83,7 +83,7 @@
     {
       "repository": "https://github.com/substance/util.git",
       "folder": "node_modules/substance-util",
-      "branch": "master"
+      "branch": "substance-next"
     },
     {
       "repository": "https://github.com/substance/cjs.git",
@@ -93,7 +93,7 @@
     {
       "repository": "https://github.com/michael/substance-composer.git",
       "folder": "node_modules/substance-composer",
-      "branch": "archivist_web"
+      "branch": "substance-next"
     }
   ],
   "node_modules": {
