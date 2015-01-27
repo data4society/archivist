@@ -140,15 +140,11 @@
     "styles/composer.css": "styles/composer.css"
   },
   "assets": {
-    "lib": "lib",
-    "styles": "styles",
-    "data": "data"
   },
   "bundle": {
-    "name": "archivist",
-    "folder": "./dist",
+    "name": "archivist_composer",
+    "folder": "./public",
     "source": "./boot_archivist_composer.js",
-    "index": "./archivist.html",
     "ignores": [
     ]
   }
