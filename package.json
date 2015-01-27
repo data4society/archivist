@@ -14,7 +14,8 @@
     "connect-mongostore": "^0.1.4",
     "express-session": "*",
     "passport": "*",
-    "passport-google-oauth": "*"
+    "passport-google-oauth": "*",
+    "substance-util": "git+https://github.com/substance/util.git#master"
   },
   "url": "http://github.com/substance/archivist/",
   "devDependencies": {
