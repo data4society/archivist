@@ -21,7 +21,7 @@ var mongoose = require('mongoose')
 // Substance stuff
 // --------------------
 
-var CJSServer = require('substance-cjs');
+// var CJSServer = require('substance-cjs');
 var config = require("./.screwdriver/project.json");
 
 // var ARCHIVIST_COMPOSER_PATH = path.join(__dirname, "node_modules/archivist-composer");
