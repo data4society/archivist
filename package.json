@@ -36,6 +36,6 @@
     "start": "NODE_ENV=development foreman start",
     "devmode": "NODE_ENV=development foreman start & gulp watch",
     "prepare": "gulp compress",
-    "postinstall": "NPM_CONFIG_PRODUCTION=false gulp compress"
+    "postinstall": "NODE_ENV=development gulp compress"
   }
 }
