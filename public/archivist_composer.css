@@ -1,17 +1,14 @@
 /* Textish Styles
 -------------------------------------------------------------------------------*/
 
-
 .text  {
   white-space: pre-wrap;
   white-space: -moz-pre-wrap;
   white-space: -pre-wrap;
 }
+
 /* Paragraph Node
 -------------------------------------------------------------------------------*/
-
-.content-node.paragraph {
-}
 
 .content-node.paragraph .content {
   min-height: 28px;
@@ -45,14 +42,9 @@
 /* Heading Node
 -------------------------------------------------------------------------------*/
 
-.content-node.heading {
-}
-
 .content-node.heading .content {
   /*min-height: 40px;*/
 }
-
-.content-node.heading { }
 
 .content-node.heading .content {
   color: #1f1f1f;
@@ -296,28 +288,12 @@
   background: #000;
 }
 
-
-
 .substance-article .content-node.figure .label {
   position: relative;
 }
 
-
-
-
-
-
 .figure-image-file {
   display: none;
-/*  position: absolute;
-  display: block;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-  width: 100%;
-  opacity: 0;
-  cursor: pointer;*/
 }
 
 .content-node.figure .caption {
@@ -326,6 +302,7 @@
   text-align: center;
   color: #777;
 }
+
 .substance-article .content-node.cover {
 }
 
@@ -481,66 +458,7 @@ a.add-image.cover:hover {
   border-bottom: 1px solid #ddd;
 }
 
-.content-node.issue {
-  border-left: 3px solid transparent;
-}
-
-.content-node.issue > .content {
-  /*border: 1px solid #ddd;*/
-}
-
-.content-node.issue:hover {
-  background: #f1f1f1;
-}
-
-.content-node.issue.active {
-  background: white;
-  border-left: 3px solid rgba(0, 0, 0, 0.8);
-}
-
-
-
-.content-node.issue .issue-title-wrapper {
-  position: relative;
-}
-
-.content-node.issue .description .content {
-  /*border-left: 5px solid #CECCAC;*/
-  padding: 0px 20px;
-  padding-bottom: 20px;
-  /*background: #FEFAB7;*/
-  color: rgba(0,0,0,0.7);
-}
-
-.content-node.issue.active .description .content {
-  /*border-left: 5px solid #6D5239; */
-  /*background: #FDF671;*/
-}
-
-
-.content-node.issue .title {
-  position: relative;
-}
-
-.content-node.issue.active .title {
-
-}
-
-.content-node.issue .content {
-  background: none;
-}
-
-.content-node.issue .creator {
-  padding: 10px 20px;
-  /*background: #fff;*/
-  font-size: 12px;
-  color: rgba(0,0,0,0.4);
-}
-
-.content-node.issue.active .creator {
-
-}
-/* URL field */
+/* Web Resource */
 
 .content-node.web-resource {
   border-left: 3px solid transparent;
@@ -555,15 +473,6 @@ a.add-image.cover:hover {
   border-left: 3px solid rgba(11, 157, 217, 1);;
 }
 
-/*.content-node.web-resource.active .resource-active {
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  bottom: 0px;
-  width: 3px;
-  background: rgba(11, 157, 217, 1);
-}*/
-
 .content-node.web-resource .url .content {
   position: relative;
   background: none;
@@ -577,11 +486,6 @@ a.add-image.cover:hover {
   font-weight: 600;
   padding: 10px;
 }
-
-/*.content-node.web-resource.active .url .content {
-  background: rgba(11, 157, 217, 1);
-  color: white;
-}*/
 
 .content-node.web-resource .description .content {
   padding: 10px;
@@ -603,7 +507,6 @@ a.add-image.cover:hover {
   top: 30px;
   padding: 0 5px;
   z-index: 50000;
-  /*font-style: italic;*/
   font-size: 12px;
   font-weight: bold;
   background: #262626;
@@ -616,345 +519,12 @@ a.add-image.cover:hover {
   color: white;
 }
 
-.content-node.web-page iframe {
-  border: none;
-  margin: 0px auto;
-  overflow: hidden;
-  border: 1px solid #ccc;
-  display: block;
-}
-
-.content-node.web-page .page-wrapper {
-  overflow: hidden;
-  margin: 0px auto;
-  position: relative;
-}
-
-
-/* WebPage status bar */
-
-.content-node.web-page div.page-wrapper .page-status {
-  margin: 0px auto;
-  background: #262626;
-  color: rgba(255,255,255,0.8);
-  font-size: 12px;
-  height: 25px;
-  line-height: 25px;
-}
-
-.content-node.web-page div.page-wrapper .page-status .file-info {
-  float: left;
-  padding-left: 5px;
-}
-
-
-
-
-.content-node.web-page div.page-wrapper .page-status .file-info {
-  float: left;
-  padding-left: 5px;
-}
-
-.content-node.web-page div.page-wrapper .page-status .file-info > span {
-  padding-right: 10px;
-}
-
-.content-node.web-page div.page-wrapper .page-status .file-info a {
-  color: white;
-}
-
-.content-node.web-page div.page-wrapper .page-status .file-info span.file-size {
-  font-size: 10px;
-}
-
-.content-node.web-page div.page-wrapper .page-status .file-info span.info {
-  padding-left: 20px;
-}
-
-
-
-.content-node.web-page div.page-wrapper .page-status .actions {
-  float: right;
-}
-
-.content-node.web-page div.page-wrapper .page-status .actions a {
-  float: left;
-  display: block;
-  padding: 0px 4px;
-  color: #fff;
-}
-
-.content-node.web-page div.page-wrapper .page-status .actions a:hover {
-  background: #000;
-}
-
-.content-node.web-page .web-page-file {
-  display: none;
-}
-
-.content-node.web-page .caption {
-  padding-top: 10px;
-  font-size: 14px;
-  text-align: center;
-  color: #777;
-}
-.video-wrapper {
-  text-align: center;
-  position: relative;
-  background: black;
-}
-
-.video-wrapper .video-files {
-  display: none;
-}
-
-.video-wrapper .video-status {
-
-  background: #262626;
-  color: rgba(255,255,255,0.4);
-  font-size: 12px;
-  height: 25px;
-  line-height: 25px;
-}
-
-.video-wrapper .video-status .file-info {
-  float: left;
-  padding-left: 5px;
-}
-
-.video-wrapper .video-status .file-info > span {
-  padding-right: 10px;
-}
-
-.video-wrapper .video-status .file-info a {
-  color: white;
-}
-
-.video-wrapper .video-status .file-info span .file-size {
-  font-size: 10px;
-  /*color: rgba(255,255,255,0.5);*/
-  display: none;
-}
-
-.video-wrapper .video-status .file-info span.info {
-  padding-left: 50px;
-}
-
-.video-wrapper .video-status .file-info span.active {
-  color: white;
-  font-weight: bold;
-}
-
-.video-wrapper .video-status .file-info span.active .file-size {
-  display: inline;
-}
-
-
-
-.video-wrapper .video-status .actions {
-  float: right;
-}
-
-.video-wrapper .video-status .actions a {
-  font-weight: bold;
-  float: left;
-  display: block;
-  padding: 0px 4px;
-  color: #fff;
-}
-
-.video-wrapper .video-status .actions a:hover {
-  background: #000;
-}
-
-.video-wrapper video {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  max-height: 500px;
-}
-
-.content-node.video .caption {
-  padding-top: 10px;
-  font-size: 14px;
-  text-align: center;
-  color: #777;
-}
-.content-node.audio > .content {
-  max-width: 400px;
-  margin: 0px auto;
-  /*background: #000;*/
-  background: #262626;
-}
-
-.content-node.audio .caption .content {
-  padding: 20px;
-  font-family: "Georgia";
-  font-style: italic;
-  font-size: 18px;
-  color: rgba(255,255,255, 0.7);
-  background: #000;
-  text-align: center;
-
-}
-
-.audio-wrapper {
-  border-radius: 5px;
-  background: #000;
-  text-align: center;
-  position: relative;
-}
-
-.audio-wrapper audio {
-  background: #000;
-  border-radius: 0px;
-  display: block;
-  max-width: 100%;
-  max-height: 500px;
-  margin: 0px auto;
-}
-
-
-.audio-wrapper .audio-files {
-  display: none;
-}
-
-.content-node.audio .audio-status {
-  color: rgba(255,255,255,0.4);
-  font-size: 12px;
-  height: 25px;
-  line-height: 25px;
-}
-
-.content-node.audio .audio-status .file-info {
-  float: left;
-  padding-left: 5px;
-}
-
-.content-node.audio .audio-status .file-info > span {
-  padding-right: 10px;
-}
-
-.content-node.audio .audio-status .file-info a {
-  color: white;
-}
-
-.content-node.audio .audio-status .file-info span .file-size {
-  font-size: 10px;
-  display: none;
-}
-
-.content-node.audio .audio-status .file-info span.info {
-  padding-left: 10px;
-}
-
-.content-node.audio .audio-status .file-info span.active {
-  color: white;
-  font-weight: bold;
-}
-
-.content-node.audio .audio-status .file-info span.active .file-size {
-  display: inline;
-}
-
-.content-node.audio .audio-status .actions {
-  float: right;
-}
-
-.content-node.audio .audio-status .actions a {
-  font-weight: bold;
-  float: left;
-  display: block;
-  padding: 0px 4px;
-  color: #fff;
-}
-
-.content-node.audio .audio-status .actions a:hover {
-  background: #000;
-}
-
-/*.content-node.audio .caption {
-  font-size: 14px;
-  text-align: center;
-  color: #777;
-}*/
-.content-node.publication-info {
-
-}
-
-.content-node.publication-info .label {
-  font-size: 12px;
-  padding-top: 20px;
-  color: #888;
-}
-
-.content-node.publication-info .dates {
-  padding-top: 40px;
-  font-size: 12px;
-  color: #aaa;
-}
 .content-node .code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 14px;
 }
-/* Cross Reference */
-
-.content-node .cross_reference {
-  background: rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-}
-
-.content-node .cross_reference:hover {
-  background-color: rgba(0, 0, 0, 0.10);
-}
-
 span.emphasis, em {
   font-style: italic;
-}
-.content-node .figure_reference {
-  padding: 1px 0px;
-  border: 1px solid rgba(145, 187, 4, 0.8);
-  color: rgba(145, 187, 4, 1);
-}
-
-.content-node .figure_reference:hover { 
-  border-color: rgba(171, 217, 17, 1);
-  color: rgba(171, 217, 17, 1);
-}
-
-.content-node .figure_reference.active {
-  color: white;
-  background: rgba(145, 187, 4, 1);
-  border-color: transparent;
-}
-.content-node .remark_reference {
-  /*background: rgba(11, 157, 217, 0.1);*/
-  background: rgba(0, 0, 0, 0.07);
-  color: rbga(0,0,0,0.1);
-}
-
-.content-node .remark_reference:hover {
-
-}
-
-.content-node .remark_reference.active { 
-  /*background: rgba(11, 157, 217, 1);*/
-  background: rgba(0, 0, 0, 0.7); /* rgba(255, 245, 0, 0.44);*/
-  color: #fff;
-  /*color: #333;*/
-  /*color: rgb(102, 99, 14);*/
-}
-.content-node .error_reference {
-  background: rgba(251, 107, 75, 0.08);
-}
-
-.content-node .error_reference:hover {
-
-}
-
-.content-node .error_reference.active {
-  background: rgba(251, 107, 75, 1);
-  color: rgb(100, 10, 10);
 }
 /* LinkReference annotation */
 .content-node .citation_reference { 
@@ -969,13 +539,13 @@ span.strong, strong {
   font-weight: 600;
 }
 
-span.strong, strong {
 span.subscript, sub {
   vertical-align: baseline;
   position: relative;
   top: 0.4em;
   font-size: 12px;
 }
+
 span.superscript, sup {
   vertical-align: baseline;
   position: relative;
