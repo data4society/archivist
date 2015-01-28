@@ -124,19 +124,16 @@
     "styles/nodes/strong.css": "node_modules/substance-article/nodes/strong/strong.css",
     "styles/nodes/subscript.css": "node_modules/substance-article/nodes/subscript/subscript.css",
     "styles/nodes/superscript.css": "node_modules/substance-article/nodes/superscript/superscript.css",
-
-    "styles/font-awesome.css": "node_modules/substance-composer/styles/font-awesome.css",
-    "styles/toc.css": "node_modules/substance-toc/toc.css",
-    "styles/surface.css": "node_modules/substance-surface/styles/surface.css",
-    "styles/substance-outline.css": "node_modules/substance-outline/outline.css",
-    "styles/substance.css": "node_modules/substance-composer/styles/substance.css",
-    "styles/writer.css": "node_modules/substance-composer/styles/writer.css",
-
     "styles/nodes/location_reference/location_reference.css": "src/nodes/location_reference/location_reference.css",
     "styles/nodes/person_reference/person_reference.css": "src/nodes/person_reference/person_reference.css",
     "styles/nodes/definition_reference/definition_reference.css": "src/nodes/definition_reference/definition_reference.css",
     "styles/nodes/subject_reference/subject_reference.css": "src/nodes/subject_reference/subject_reference.css",
 
+    "styles/toc.css": "node_modules/substance-toc/toc.css",
+    "styles/surface.css": "node_modules/substance-surface/styles/surface.css",
+    "styles/substance-outline.css": "node_modules/substance-outline/outline.css",
+    "styles/substance.css": "node_modules/substance-composer/styles/substance.css",
+    "styles/writer.css": "node_modules/substance-composer/styles/writer.css",
     "styles/composer.css": "styles/composer.css"
   },
   "assets": {
