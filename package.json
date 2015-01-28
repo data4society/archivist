@@ -35,6 +35,7 @@
   "scripts": {
     "start": "NODE_ENV=development foreman start",
     "devmode": "NODE_ENV=development foreman start & gulp watch",
-    "prepare": "gulp compress"
+    "prepare": "gulp compress",
+    "postinstall": "gulp compress"
   }
 }
