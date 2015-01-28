@@ -23,12 +23,12 @@ gulp.task('browserify', function() {
       };
   return bundle();
 });
- 
+
 gulp.task('watch', function() {
   var bundler = browserify(sourceFile,{debug: true, cache: {}, packageCache: {}});
   bundler = watchify(bundler);
   bundler.on('update', rebundle);
- 
+
   function rebundle() {
     console.log('building new version')
     // gulp.src('./client/platform/index.css')
@@ -43,7 +43,7 @@ gulp.task('watch', function() {
       .pipe(source(destFile))
       .pipe(gulp.dest(destFolder));
   }
- 
+
   return rebundle();
 });
 
@@ -80,5 +80,5 @@ function duo(opts) {
       });
   });
 }
- 
-gulp.task('default', ['browserify', 'watch']);
+
+gulp.task('default', ['browserify', 'compress']);
