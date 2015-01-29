@@ -7,8 +7,7 @@ var Backbone = require('backbone'),
     forms = require('backbone-forms'),
     parent = require('./local_modules/parent-form/parent.js'),
     bootstrapForms = require('./local_modules/bootstrap-form/bootstrap3.js'),
-    bootstrap = require('./local_modules/bootstrap-modal/bootstrap.js'),
-    modal = require('./local_modules/backbone.bootstrap-modal'),
+    modal = require('./node_modules/backbone.modal/backbone.modal.js'),
     filters = require('backgrid-filter'),
     _ = require('underscore'),
     $ = require('jquery'),
@@ -19,6 +18,7 @@ var Backbone = require('backbone'),
 
 var MainGrid = Backbone.Layout.extend({
   icon: '',
+  title: 'Archivist',
   initialize: function() {
     this.grid = new Backgrid.Grid({
       row: ClickableRow,
@@ -35,6 +35,7 @@ var MainGrid = Backbone.Layout.extend({
     this.contextMenu.reset(this.panel);
   },
   afterRender: function() {
+    Backbone.middle.trigger('domchange:title', this.title);
     $('#' + this.icon).addClass('active');
     this.$el.addClass(this.options.class);
     this.filters();
@@ -311,6 +312,7 @@ exports.stackView = StackView
 
 var DocumentsGrid = MainGrid.extend({
   icon: 'dashboard',
+  title: 'Dashboard',
   className: 'dashboard',
   initialize: function() {
     this.grid = new Backgrid.Grid({
@@ -786,6 +788,7 @@ exports.subjectsView = SubjectsView
 
 var SubjectsTreeView = Backbone.Layout.extend({
   icon: 'subjects',
+  title: 'Subjects',
   className: 'subjects',
   template: '#subjectsTreeLayout',
 
@@ -798,7 +801,20 @@ var SubjectsTreeView = Backbone.Layout.extend({
 
   },
   afterRender: function() {
+
+    var to = false;
+    $('#search_subject').keyup(function () {
+      console.log('searching...');
+      if(to) { clearTimeout(to); }
+      to = setTimeout(function () {
+        var v = $('#search_subject').val();
+        console.log('searching...', v);
+        $('.tree').jstree(true).search(v);
+      }, 250);
+    });
+
     var self = this;
+    Backbone.middle.trigger('domchange:title', this.title);
     $('#' + this.icon).addClass('active');
     this.contextMenu.reset(this.panel);
     $('.tree')
@@ -826,6 +842,8 @@ var SubjectsTreeView = Backbone.Layout.extend({
         "plugins" : [ "contextmenu", "dnd", "search", "state", "types", "wholerow", "sort"]
       });
   },
+
+
   itemsFunc: function(o, cb, context) {
     var self = this;
 
@@ -849,29 +867,9 @@ var SubjectsTreeView = Backbone.Layout.extend({
 
         console.log('editing subject...');
 
-        var input = document.createElement("textarea");
-        input.id = "description";
-        input.placeholder = "Describe subject here...";
-        input.innerHTML = subject.get('description');
+        var editModal = new subjectModal({model: subject});
 
-        var container = document.createElement("div");
-        container.appendChild(input);
-
-        var modal = new Backbone.BootstrapModal({ content: container.innerHTML, animate: true }).open(function(){
-          var description = document.getElementById("description").value;
-
-          subject.save('description', description, {
-            success: function(model, resp) { 
-              Notify.spinner('hide');
-              var notice = Notify.info('Subject ' + subject.get('name') + ' has been updated');
-            },
-            error: function(model, err) { 
-              Notify.spinner('hide');
-              var notice = Notify.info('Sorry, the error occured! Please reload the page and try again.');
-              console.log(err);
-            }
-          })
-        });
+        $('#main').append(editModal.render().el);
 
       }
     };
@@ -890,21 +888,30 @@ var SubjectsTreeView = Backbone.Layout.extend({
 
         console.log('creating a new subject...');
 
-        var id = new ObjectId().toString();
+        var newNode = {
+          _id: new ObjectId().toString(), // daniel you can try to remove this here
+          name: 'New Subject',
+          parent: obj.id
+        };
 
-        inst.create_node(obj, {id: id}, "last", function (new_node) {
-          //setTimeout(function () { inst.edit(new_node); },0);
-          o.collection.create({ _id: new_node.id, name: new_node.text, parent: new_node.parent }, {
-            success: function(model,resp) {
-              Notify.spinner('hide');
-              Notify.info('Subject ' + obj.model.get('name') + ' has been created!');
-            },
-            error: function(model,err) { 
-              Notify.spinner('hide');
-              Notify.info('Sorry, the error occured! Please reload the page and try again.');
-              console.log(err);
-            }
-          });
+        console.log('newnode', newNode);
+
+        o.collection.create(newNode, {
+          wait: true,
+          success: function(model, resp) {
+            console.log('success', model, resp);
+            inst.create_node(obj, {id: newNode._id, text: newNode.name}, "last", function (new_node) {
+              setTimeout(function () { inst.edit(new_node); },0);
+            });
+
+            Notify.spinner('hide');
+            Notify.info('Subject ' + obj.model.get('name') + ' has been created!');
+          },
+          error: function(model,err) { 
+            console.log(err);
+            Notify.spinner('hide');
+            Notify.info('Sorry, the error occured! Please reload the page and try again.');
+          }
         });
       }
     };
@@ -920,9 +927,12 @@ var SubjectsTreeView = Backbone.Layout.extend({
       "icon"        : false,
       "separator_after" : false,
       "_disabled"   : function (data) {
+        if (!window.superaccess) return true;
+        
         var inst = $.jstree.reference(data.reference),
             obj = inst.get_node(data.reference);
             hasChildren = obj.children.length > 0;
+
         return hasChildren; // Only leaf nodes can be deleted
       },
       "label"       : "Delete",
@@ -932,30 +942,37 @@ var SubjectsTreeView = Backbone.Layout.extend({
         
         console.log('deleting...', obj.id);
 
-        obj.model.destroy({
-          success: function(model,resp) {
-            Notify.spinner('hide');
-            Notify.info('Subject ' + obj.model.get('name') + ' has been removed!');
-          },
-          error: function(model,err) { 
-            Notify.spinner('hide');
-            Notify.info('Sorry, the error occured! Please reload the page and try again.');
-            console.log(err);
-          }
+        var dialog = new Backbone.Model({
+          title: "Delete Subject",
+          description: "Deleting a subject is critical operation, that also affects existing interviews. The operation can take up to a minute to complete. During that time the system will be turned into <b>maintenance mode</b>, where editors can not save documents.",
+          action: "Confirm deletion",
+          submitState: "Deleting...",
+          initState: "Removing subject from documents..."
+        })
+
+        dialog.on('confirm', function(dialog){
+          obj.model.destroy({
+            success: function(model,resp) {
+              if(inst.is_selected(obj)) {
+                inst.delete_node(inst.get_selected());
+              } else {
+                inst.delete_node(obj);
+              }
+              dialog.submit('Done! Exiting from maintenance mode...', 'ok');
+              Notify.spinner('hide');
+              Notify.info('Subject ' + obj.model.get('name') + ' has been removed!');
+            },
+            error: function(model,err) { 
+              Notify.spinner('hide');
+              Notify.info('Sorry an error occurred!', err.responseText);
+              dialog.submit(err, 'error');
+              console.log(err);
+            }
+          });
         });
 
-        // ----------------------------------------
-        // TODO DANIEL:
-        // Call server function deleteSubject
-        // ----------------------------------------
-
-
-        if(inst.is_selected(obj)) {
-          inst.delete_node(inst.get_selected());
-        }
-        else {
-          inst.delete_node(obj);
-        }
+        var editDialog = new subjectDialog({model: dialog});
+        $('#main').append(editDialog.render().el);
       }
     };
 
@@ -967,6 +984,8 @@ var SubjectsTreeView = Backbone.Layout.extend({
       "_disabled"     : false,
       "label"       : "Merge",
       "_disabled"   : function (data) {
+        if (!window.superaccess) return true;
+
         var inst = $.jstree.reference(data.reference),
             obj = inst.get_node(data.reference);
             hasChildren = obj.children.length > 0;
@@ -988,6 +1007,7 @@ var SubjectsTreeView = Backbone.Layout.extend({
       "separator_before"  : false,
       "separator_after" : true,
       "_disabled"     : function (data) {
+        if (!window.superaccess) return true;
         return !$.jstree.currentState.nodeToMerge;
       },
       "label"       : "Merge into",
@@ -1009,26 +1029,35 @@ var SubjectsTreeView = Backbone.Layout.extend({
         
         console.log('completing merge of ', nodeToMerge.id, 'into ', targetNode.id);
 
-        // ----------------------------------------
-        // TODO DANIEL:
-        // Call server function mergeSubjects
-        // ----------------------------------------
+        var dialog = new Backbone.Model({
+          title: "Merge Subjects",
+          description: "Merging subjects is critical operation, that also affects existing interviews. The operation can take up to a minute to complete. During that time the system will be turned into <b>maintenance mode</b>, where editors can not save documents.",
+          submitState: "Merging...",
+          initState: "Changing subjects in documents..."
+        })
 
-        request
-          .get('/api/subjects/merge')
-          .query({ one: nodeToMerge.id, into: targetNode.id })
-          .end(function(res){
-            if(res.ok) {
-              Notify.spinner('hide');
-              Notify.info('Merge has been completed!');
-            } else {
-              Notify.spinner('hide');
-              var notice = Notify.info('Sorry, the error occured! Please reload the page and try again.');
-            }
-          });
+        dialog.on('confirm', function(dialog){
+          request
+            .get('/api/subjects/merge')
+            .query({ one: nodeToMerge.id, into: targetNode.id })
+            .end(function(res) {
+              if (res.ok) {
+                Notify.spinner('hide');
 
-        inst.delete_node(nodeToMerge);
-        $.jstree.currentState.nodeToMerge = null;
+                inst.delete_node(nodeToMerge);
+                $.jstree.currentState.nodeToMerge = null;
+                dialog.submit('Done! Exiting from maintenance mode...', 'ok');
+                Notify.info('Merge has been completed!');
+              } else {
+                Notify.spinner('hide');
+                dialog.submit(err, res.text);
+                var notice = Notify.info('Sorry, the error occured! Please reload the page and try again.');
+              }
+            });
+        });
+
+        var mergeDialog = new subjectDialog({model: dialog});
+        $('#main').append(mergeDialog.render().el);
       }
     };
 
@@ -1038,6 +1067,28 @@ var SubjectsTreeView = Backbone.Layout.extend({
     $('#' + this.icon).removeClass('active');
     this.remove();
     this.unbind();
+  },
+  _addNewSubject: function() {
+    var id = new ObjectId().toString(),
+        new_node = {'id': id, 'text': 'New Subject'};
+    
+    this.collection.create({ _id: new_node.id, name: new_node.text, parent: '' }, {
+      success: function(model, resp) {
+        $('.tree').jstree('create_node', '#', new_node, 'last', function (newJSTreeNode) {
+          setTimeout(function() {
+            $('.tree').jstree().edit(newJSTreeNode);
+          },0);
+        });
+
+        Notify.spinner('hide');
+        Notify.info('Subject ' + model.get('name') + ' has been created!');
+      },
+      error: function(model, err) { 
+        Notify.spinner('hide');
+        Notify.info('Sorry an error occurred!', err.responseText);
+        console.log(err);
+      }
+    });
   },
   _onMoveNode: function(e, data, context) {
     console.log('node moved yay', e, data);
@@ -1060,14 +1111,13 @@ var SubjectsTreeView = Backbone.Layout.extend({
       },
       error: function(model, err) { 
         Notify.spinner('hide');
-        var notice = Notify.info('Sorry, the error occured! Please reload the page and try again.');
         console.log(err);
+        alert('Sorry an error occurred: ', err);
+        window.location.href = "/subjects";
       }
     })
   },
   _onRenameNode: function(e, data, context) {
-    console.log('renamed node moved yay', e, data);
-      
     var updatedNode = data.node;
     var newName = data.text;
     var oldName = data.old;
@@ -1084,30 +1134,74 @@ var SubjectsTreeView = Backbone.Layout.extend({
       },
       error: function(model, err) { 
         Notify.spinner('hide');
-        var notice = Notify.info('Sorry, the error occured! Please reload the page and try again.');
+
         console.log(err);
+        alert('Sorry an error occurred: ', err);
+        window.location.href = "/subjects";
       }
     })
   },
   panel: [
     {
-      name: "save",
-      icon: "save",
-      fn: "_save"
-    },
-    {
       name: "Add new subject",
       icon: "plus",
-      fn: "_add"
-    },
-    {
-      name: "import",
-      icon: "file-text-o",
-      fn: "_import"
+      fn: "_addNewSubject"
     }
   ]
 })
 exports.subjectsTreeView = SubjectsTreeView
+
+var subjectModal = Backbone.Modal.extend({
+  prefix: 'subject-modal',
+  keyControl: false,
+  template: _.template($('#subjectModal').html()),
+  cancelEl: '.cancel',
+  submitEl: '.ok',
+  submit: function() {
+    var self = this,
+        description = document.getElementById("description").value;
+
+    self.model.save('description', description, {
+      success: function(model, resp) { 
+        Notify.spinner('hide');
+        var notice = Notify.info('Subject ' + self.model.get('name') + ' has been updated');
+      },
+      error: function(model, err) { 
+        Notify.spinner('hide');
+        var notice = Notify.info('Sorry, the error occured! Please reload the page and try again.');
+        console.log(err);
+      }
+    })
+  }
+});
+
+var subjectDialog = Backbone.Modal.extend({
+  prefix: 'subject-dialog',
+  keyControl: false,
+  template: _.template($('#subjectDialog').html()),
+  cancelEl: '.cancel',
+  submitEl: '.run',
+  beforeSubmit: function() {
+    debugger;
+    this.$el.find('button').prop('disabled', true);
+    this.$el.find('.run').text(this.model.get('submitState'));
+    this.$el.find('#meter').show();
+    this.$el.find('#state').html(this.model.get('initState'))
+    this.model.trigger('confirm', this);
+    return false;
+  },
+  submit: function(msg, state) {
+    this.$el.find('#meter').addClass(state);
+    this.$el.find('#state').addClass(state).html(msg);
+    this.model.stopListening();
+    setTimeout(function(dialog){
+      dialog.destroy();
+    }, 500, this);
+  },
+  cancel: function() {
+    this.model.stopListening();
+  }
+});
 
 var SubjectsEdit = Backbone.View.extend({
   className: "subject-edit",
@@ -1152,6 +1246,24 @@ var SubjectsEdit = Backbone.View.extend({
   }
 })
 exports.subjectsEdit = SubjectsEdit
+
+// USERS GRID
+var UsersGrid = MainGrid.extend({
+  icon: 'users',
+  title: 'Users',
+  className: 'userlist',
+  initialize: function() {
+    $('#' + this.icon).addClass('active');
+    this.grid = new Backgrid.Grid({
+      columns: this.options.columns,
+      collection: this.options.collection
+    });
+    $(this.$el).append(this.grid.render().$el);
+  },
+  filters: function() {
+  }
+})
+exports.usersGrid = UsersGrid
 
 
 //MENU

@@ -123,6 +123,8 @@ db.listDocuments = function(opt, cb) {
 
 
 
+
+
 /* The Subject REST api */
 
 /** 
@@ -133,9 +135,11 @@ db.listDocuments = function(opt, cb) {
  */
 
 db.createSubject = function(subject, cb) {
-  new Subject(subject).save(function(err) {
+  new Subject(subject).save(function(err, subject) {
     if (err) return cb(err);
-    db.incrementSubjectsDBVersion(cb);
+    db.incrementSubjectsDBVersion(function(err){
+      cb(err, subject)
+    });
   });
 }
 
@@ -215,7 +219,7 @@ db.updateSubjectForDoc = function(docId, subjectId, opt, cb) {
       cb(null);
     }
   });
-};
+}
  
  
 /** 
@@ -232,12 +236,56 @@ db.propagateSubjectChange = function(subjectId, opt, cb) {
       iterator: function(doc, cb) {
         db.updateSubjectForDoc(doc._id, subjectId, opt, cb);
       }
-    }, function() {
+    }, function(err) {
       console.log('done with everything yay!');
-      cb(null);
+      cb(err);
     });
   });
 };
+
+
+/** 
+ * Start a new transaction for batch document operations
+ *
+ * @param {callback} cb - The callback that handles the results 
+ */
+
+db.beginTransaction = function(cb) {
+  console.log('beginning transaction ...');
+  // turn on maintenance mode
+  db.setMaintenanceMode(true, function(err) {
+    if (err) return cb(err);
+
+    db.backupDocuments(cb);
+  });
+}
+
+/** 
+ * Cancel transaction to roll back document updates
+ *
+ * @param {callback} cb - The callback that handles the results 
+ */
+
+db.cancelTransaction = function(cb) {
+  // Switch off maintenance mode after successful completion
+  console.log('canceling transaction... rolling back document updates');
+  db.restoreDocuments(function(err) {
+    if (err) return err;
+    db.setMaintenanceMode(false, cb);
+  });
+}
+
+
+/** 
+ * Commit transaction by turning off maintenance mode
+ *
+ * @param {callback} cb - The callback that handles the results 
+ */ 
+
+db.commitTransaction = function(cb) {
+  console.log('commiting transaction...');
+  db.setMaintenanceMode(false, cb);
+}
 
 /** 
  * Removes Subject record by unique id 
@@ -246,22 +294,87 @@ db.propagateSubjectChange = function(subjectId, opt, cb) {
  * @param {callback} cb - The callback that handles the results 
  */
 
-db.removeSubject = function(subjectId, cb) {
-  // Check if subject has children, if yes reject deletion
-  Subject.find({parent: subjectId}, 'id', {}, function(err, subjects) {
-    if (subjects.length > 0) {
-      return cb('can not delete subject that has child subjects');
-    }
 
+db.removeSubject = function(subjectId, cb) {
+
+  // Unsave op (needs to be wrapped in a transaction)
+  function updateDocsAndRemoveSubject(cb) {
     db.propagateSubjectChange(subjectId, {mode: "delete"}, function(err) {
       if (err) return cb(err);
       Subject.findByIdAndRemove(subjectId, function (err) {
         if (err) return cb(err);
+
         db.incrementSubjectsDBVersion(cb);
+      });
+    });
+  }
+
+  // Check if subject has children, if yes reject deletion
+  Subject.find({parent: subjectId}, 'id', {}, function(err, subjects) {
+
+    if (subjects.length > 0) {
+      return cb('can not delete subject that has child subjects');
+    }
+
+    db.beginTransaction(function(err) {
+      if (err) return cb(err);
+
+      updateDocsAndRemoveSubject(function(err) {
+        if (err) {
+          db.cancelTransaction(function(terr) {
+            if (terr) return cb(terr);
+            cb(err);
+          });          
+        } else {
+          db.commitTransaction(cb);
+        }
       });
     });
   });
 };
+
+
+
+/** 
+ * Merge Subjects
+ *
+ * @param {string} subjectId - Id of subject to merge
+ * @param {string} newSubjectId - Id of subject to merge into
+ * @param {callback} cb - The callback that handles the results 
+ */
+
+db.mergeSubjects = function(subjectId, newSubjectId, cb) {
+  console.log("Let's merge " + subjectId + " into " + newSubjectId + "!");
+
+  function updateDocsAndMergeSubjects(cb) {
+    db.propagateSubjectChange(subjectId, {mode: "replace", newSubjectId: newSubjectId}, function(err) {
+      if (err) return cb(err);
+      Subject.findByIdAndRemove(subjectId, cb);
+    });
+  }
+
+  // Check if subject has children, if yes reject deletion
+  Subject.find({parent: subjectId}, 'id', {}, function(err, subjects) {
+    if (subjects.length > 0) {
+      return cb('can not merge subject that has child subjects');
+    }
+
+    db.beginTransaction(function(err) {
+      if (err) return cb(err);
+
+      updateDocsAndMergeSubjects(function(err) {
+        if (err) {
+          db.cancelTransaction(function(terr) {
+            if (terr) return cb(terr);
+            cb(err);
+          });          
+        } else {
+          db.commitTransaction(cb);
+        }
+      });
+    });
+  });
+}
 
 
 /** 
@@ -282,31 +395,26 @@ db.listSubjects = function(opt, cb) {
 
 
 /** 
- * Merge Subjects
+ * Make subjects backup
  *
- * @param {string} subjectId - Id of subject to merge
- * @param {string} newSubjectId - Id of subject to merge into
  * @param {callback} cb - The callback that handles the results 
  */
 
-db.mergeSubjects = function(subjectId, newSubjectId, cb) {
-  console.log("Let's merge " + subjectId + " into " + newSubjectId + "!");
-
-  // Check if subject has children, if yes reject deletion
-  Subject.find({parent: subjectId}, 'id', {}, function(err, subjects) {
-    if (subjects.length > 0) {
-      return cb('can not merge subject that has child subjects');
-    }
-
-    db.propagateSubjectChange(subjectId, {mode: "replace", newSubjectId: newSubjectId}, function(err) {
-      if (err) return cb(err);
-
-      Subject.findByIdAndRemove(subjectId, function (err) {
-        cb(err);
-      });      
-    });
-  });
+db.makeSubjectsBackup = function(cb) {
+  Subject.backup(cb);
 }
+
+/** 
+ * Restore subjects backup
+ *
+ * @param {callback} cb - The callback that handles the results 
+ */
+
+db.restoreSubjectsBackup = function(cb) {
+  Subject.restore(cb);
+}
+
+
 
 /* The User api */
 
@@ -352,15 +460,12 @@ db.getUser = function(id, done) {
  */
 
 db.updateUser = function(id, data, cb) {
-  var data = req.body
-    , id = req.params.id;
-
   delete data._id;
   delete data._v;
 
   User.findByIdAndUpdate(id, { $set: data }, function (err, user) {
     if (err) return next(err);
-    cb(user);
+    cb(err, user);
   });
 } 
 
@@ -488,4 +593,47 @@ db.getSubjectDBVersion = function(cb) {
     if (err) return err;
     cb(err, variable.get('version'));
   });
+}
+
+/**
+ * Create a backup copy of all documents
+ *
+ * @param {callback} cb - The callback when backup job is done
+ */
+
+db.backupDocuments = function(cb) {
+  Document.backup(cb);
+}
+
+
+/**
+ * Restore from a previous backup snapshot
+ *
+ * @param {callback} cb - The callback when backup job is done
+ */
+
+db.restoreDocuments = function(cb) {
+  Document.restore(cb);
+}
+
+
+/**
+ * Turn maintenance mode on or off
+ *
+ * @param {boolean} on - true if maintenance mode should be turned on
+ * @param {callback} cb - The callback when backup job is done
+ * 
+ * Note: we don't need a userId anymore for implicit maintenance mode
+ */
+
+db.setMaintenanceMode = function(on, cb) {
+  try {
+    var data = {
+      on: on
+    };
+    
+    db.setSystemVariable('maintenance', data, cb);
+  } catch (e) {
+    cb(err);
+  }
 }

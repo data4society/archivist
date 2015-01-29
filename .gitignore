@@ -1,7 +1,8 @@
 .env
 .DS_Store
-/node_modules/
+node_modules/
 *.sublime-*
 /dist
 public/platform/*
 /components/
+npm-debug.log
